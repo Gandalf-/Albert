@@ -1,2 +1,2 @@
 # Albert
-Small Python chatbot
+Small Python chatbot that can remember between sessions

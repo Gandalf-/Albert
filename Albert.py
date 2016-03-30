@@ -3,14 +3,13 @@ import string, json
 clean = lambda s : s.translate(string.maketrans("",""), string.punctuation).lower()
 
 verbs = ['will', 'were', 'know']
-binders = ['is', 'are', 'was']
 articles = ['the', 'an', 'of', 'your', 'my', 'our', 'their', 'a']
 pronouns = ['i', 'me', 'you', 'he', 'she', 'we', 'they', 'it']
 questions = ['what', 'who', 'where', 'how', 'when', 'why']
 misc = ['there', 'if', 'let']
 
-question_response  = "You said it was " 
-general_response = "Is that like \""
+binders = [' is ', ' are ', ' was ']
+
 
 # Attempt to retrieve memory
 with open ("dictionary.json", "r") as f:
@@ -23,16 +22,27 @@ previous_question, foundBinding = False, False
 words = verbs + articles + pronouns + questions + misc
 said = raw_input('\n? ')
 
+# Tries to find a noun verb noun binding
+def attempt_bindings(said):
+    for bind in binders:
+        learn = said.split(bind)
+        if len(learn) != 1: return learn
+
+    return said.split(' is ')
+
 # Input loop
 while clean(said) != 'quit':
     # Variables
-    learn = said.split(' is ')
+    learn = attempt_bindings(said)
     working = said.split()
-    words = len(working)
+    num_words = len(working)
     first = clean(working[0])
 
+    # Preparation
     all_known, attempt_learn = True, True
     can_respond, simple = False, False
+    question_response  = "You said it was " 
+    general_response = "Is that like \""
 
     # Check for question
     if said[-1] == '?':
@@ -50,23 +60,24 @@ while clean(said) != 'quit':
         learned.clear()
 
     # Check for simple (yes/no)
-    elif first == "yes" and words == 1:
+    elif first == "yes" and num_words == 1:
         simple = True
         if previous_question: print "Great, I'm so smart"
         else: print "Yes what?"
 
-    elif first == "no" and words == 1:
+    elif first == "no" and num_words == 1:
         simple = True
         if previous_question: print "Oh well"
         else: print "No what?"
 
     previous_question = False
 
-  # Check for teaching, then learn
+    # Check for teaching, then learn
     if attempt_learn and len(learn) > 1:
         can_learn = True
         x = clean(learn[0])
         y = clean(learn[1])
+        print "I'm trying to learn..."
 
         for l in learn:
             l = clean(l.strip())
@@ -81,8 +92,8 @@ while clean(said) != 'quit':
                 learned[x] = y
                 learned[y] = x
                 print "Okie doke"
-        else:
-            print "You're not making any sense"
+
+        else: print "You're not making any sense"
 
     # Main
     elif not simple:
@@ -101,7 +112,6 @@ while clean(said) != 'quit':
                     can_respond = True
                     general_response = general_response + dic_check + " "
                     question_response = question_response + dic_check + " "
-
                 else:
                     all_known = False
 
@@ -123,7 +133,7 @@ while clean(said) != 'quit':
             previous_question = True
             print general_response+'\"?'
     
-    # End of parsing
+    # Next loop
     said = raw_input('\n? ')
 
 # User said quit, save dictionary
