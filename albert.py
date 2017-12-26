@@ -1,6 +1,11 @@
-import string, json
+#!/usr//bin/python2.7
+import string
+import json
 
-clean = lambda s : s.translate(string.maketrans("",""), string.punctuation).lower()
+
+def clean(s): return s.translate(
+    string.maketrans("", ""), string.punctuation).lower()
+
 
 verbs = ['will', 'were', 'know']
 articles = ['the', 'an', 'of', 'your', 'my', 'our', 'their', 'a']
@@ -12,7 +17,7 @@ binders = [' is ', ' are ', ' was ']
 
 
 # Attempt to retrieve memory
-with open ("dictionary.json", "r") as f:
+with open("dictionary.json", "r") as f:
     try:
         learned = json.load(f)
     except ValueError:
@@ -20,15 +25,19 @@ with open ("dictionary.json", "r") as f:
 
 previous_question, foundBinding = False, False
 words = verbs + articles + pronouns + questions + misc
-said = raw_input('\n? ')
+said = input('\n? ')
 
 # Tries to find a noun verb noun binding
+
+
 def attempt_bindings(said):
     for bind in binders:
         learn = said.split(bind)
-        if len(learn) != 1: return learn
+        if len(learn) != 1:
+            return learn
 
     return said.split(' is ')
+
 
 # Input loop
 while clean(said) != 'quit':
@@ -41,7 +50,7 @@ while clean(said) != 'quit':
     # Preparation
     all_known, attempt_learn = True, True
     can_respond, simple = False, False
-    question_response  = "You said it was " 
+    question_response = "You said it was "
     general_response = "Is that like \""
 
     # Check for question
@@ -51,24 +60,28 @@ while clean(said) != 'quit':
     # Check for commands
     elif first == "showbindings":
         simple = True
-        print "> Current bindings are: " 
-        print learned
+        print('> Current bindings are: ')
+        print(learned)
 
     elif first == "clearbindings":
         simple = True
-        print "> Cleared bindings"
+        print("> Cleared bindings")
         learned.clear()
 
     # Check for simple (yes/no)
     elif first == "yes" and num_words == 1:
         simple = True
-        if previous_question: print "Great, I'm so smart"
-        else: print "Yes what?"
+        if previous_question:
+            print("Great, I'm so smart")
+        else:
+            print("Yes what?")
 
     elif first == "no" and num_words == 1:
         simple = True
-        if previous_question: print "Oh well"
-        else: print "No what?"
+        if previous_question:
+            print("Oh well")
+        else:
+            print("No what?")
 
     previous_question = False
 
@@ -77,23 +90,24 @@ while clean(said) != 'quit':
         can_learn = True
         x = clean(learn[0])
         y = clean(learn[1])
-        print "I'm trying to learn..."
+        print("I'm trying to learn...")
 
         for l in learn:
             l = clean(l.strip())
 
             if l in words:
                 can_learn = False
-    
+
         if can_learn:
             if x == y:
-                print "Obviously"
+                print("Obviously")
             else:
                 learned[x] = y
                 learned[y] = x
-                print "Okie doke"
+                print("Okie doke")
 
-        else: print "You're not making any sense"
+        else:
+            print("You're not making any sense")
 
     # Main
     elif not simple:
@@ -106,9 +120,9 @@ while clean(said) != 'quit':
 
             # Is the word known or unknown?
             if w not in words:
-                dic_check= learned.get(w, None)
-      
-                if dic_check != None:
+                dic_check = learned.get(w, None)
+
+                if dic_check is not None:
                     can_respond = True
                     general_response = general_response + dic_check + " "
                     question_response = question_response + dic_check + " "
@@ -116,28 +130,28 @@ while clean(said) != 'quit':
                     all_known = False
 
                     if attempt_learn:
-                        print 'What is '+w+'?'
+                        print('What is ' + w + '?')
 
         # Output
         if all_known and not can_respond:
-            print 'Huh, okay'
+            print('Huh, okay')
 
         elif not can_respond and not attempt_learn:
-            print "I don't know, you tell me"
+            print("I don't know, you tell me")
 
         elif not attempt_learn:
             previous_question = True
-            print question_response
+            print(question_response)
 
         elif all_known and can_respond:
             previous_question = True
-            print general_response+'\"?'
-    
+            print(general_response + '\"?')
+
     # Next loop
-    said = raw_input('\n? ')
+    said = input('\n? ')
 
 # User said quit, save dictionary
-with open ("dictionary.json", "w") as f:
+with open("dictionary.json", "w") as f:
     json.dump(learned, f)
 
-print "Bye!"
+print("Bye!")
